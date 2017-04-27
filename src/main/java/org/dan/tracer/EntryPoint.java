@@ -1,6 +1,7 @@
 package org.dan.tracer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,7 +24,7 @@ public class EntryPoint {
         final LogLineParser logLineParser = new LogLineParser(
                 serviceDictionary, requestRepo);
         final ByteBuffer inputBuf = ByteBuffer.allocate(options.getReadBufferBytes())
-                .order(BIG_ENDIAN);
+                .order(LITTLE_ENDIAN);
 
         int linesSinceAutoEnd = 0;
         long oldestTime = 0;

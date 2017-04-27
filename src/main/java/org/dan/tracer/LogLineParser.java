@@ -13,12 +13,15 @@ import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+
 public class LogLineParser {
     private static final Logger logger = LoggerFactory.getLogger(LogLineParser.class);
 
     public static final long NULL_SPAN = strToLong("null->");
     private static final short ARROW = (short) strToLong("->");
     private static final char LINE_END = '\n';
+    private static final int[] DAYS_IN_MONTH = sum(
+            0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
     private final Dictionary serviceDictionary;
     private final RequestRepo requestRepo;
@@ -40,12 +43,12 @@ public class LogLineParser {
             }
             return 0;
         }
-        final long started = readEpochTimeStamp(in);
+        final long started = readTimeStamp(in);
         if (in.get() != ' ') {
             searchNewLine = true;
             return 0;
         }
-        final long ended = readEpochTimeStamp(in);
+        final long ended = readTimeStamp(in);
         if (in.get() != ' ') {
             searchNewLine = true;
             return 0;
@@ -115,12 +118,6 @@ public class LogLineParser {
                 + parseMs(in);
     }
 
-    private static final long EPOCH = readTimeStamp(wrap("1970-01-01T00:00:00.000Z ".getBytes()));
-
-    public static long readEpochTimeStamp(ByteBuffer in) {
-        return readTimeStamp(in) - EPOCH;
-    }
-
     private static int parseYear(ByteBuffer in) {
         return parseInt(in.getInt());
     }
@@ -132,7 +129,7 @@ public class LogLineParser {
 
     // 23
     private static int parseDay(ByteBuffer in) {
-        return parseInt(in.getShort());
+        return parseInt(in.getShort()) - 1;
     }
 
     private static int parseInt(int text) {
@@ -145,16 +142,12 @@ public class LogLineParser {
     }
 
     private static long yearsToMs(int years) {
-        return years * 365L * 24L * 3600L * 1000L
-                + DAYS.toMillis((years - 1) >>> 2);
+        return YEAR_TO_MS[years - BASE_YEAR];
     }
-
-    private static final int[] DAYS_IN_MONTH = sum(
-            31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
     private static long monthsToMs(int month, int year) {
         int days = DAYS_IN_MONTH[month - 1];
-        if ((year & 7) == 6 && month > 2) {
+        if (leapyear(year) && month > 2) {
             ++days;
         }
         return DAYS.toMillis(days);
@@ -186,7 +179,7 @@ public class LogLineParser {
 
     // 945Z
     private static int parseMs(ByteBuffer in) {
-        return parseInt(in.getInt() >>> 8);
+        return parseInt(in.getInt() & (~0 >>> 8));
     }
 
     private static boolean leapyear(int year) {
@@ -195,8 +188,7 @@ public class LogLineParser {
                 || (year) % 400 != 0);
     }
 
-    private static final int EPOCH_YR = 1970;
-    private static long SECS_DAY = 24L * 60L * 60L * 1000L;
+    private static long MSECS_DAY = 24L * 60L * 60L * 1000L;
     private static final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
     private static final int DAYS_PER_MONTH[] = new int[] {
@@ -204,34 +196,40 @@ public class LogLineParser {
             31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     private static final int BASE_DAY;
+    private static final int BASE_YEAR;
     private static final int[] DAY_TO_YEAR_MONTH;
+    private static final long[] YEAR_TO_MS;
 
     static  {
-        final int baseYear = now.getYear() - 3;
+        BASE_YEAR = 1970; //now.getYear() - 6;
         final int stopYear = now.getYear() + 2;
-        DAY_TO_YEAR_MONTH = new int[stopYear - baseYear];
+        DAY_TO_YEAR_MONTH = new int[(stopYear - BASE_YEAR) * 366];
+        YEAR_TO_MS = new long[stopYear - BASE_YEAR];
         int baseDay = 0;
         int dayno = 0;
+        long yearMs = 0;
         for (int year = 1970; year < stopYear; ++year) {
             int leapShift = leapyear(year) ? 12 : 0;
             for (int month = 0; month < 12; ++month) {
                 final int days = DAYS_PER_MONTH[month + leapShift];
                 for (int day = 1; day < days; ++day) {
-                    if (year >= baseYear) {
-                        DAY_TO_YEAR_MONTH[dayno] = year << 9 | (day << 4) | (month + 1);
+                    if (year >= BASE_YEAR) {
+                        YEAR_TO_MS[year - BASE_YEAR] = yearMs;
+                        DAY_TO_YEAR_MONTH[dayno - baseDay] = year << 9 | (day << 4) | (month + 1);
                     } else {
                         baseDay = dayno;
                     }
                     ++dayno;
                 }
             }
+            yearMs += (leapShift / 12L + 365L) * MSECS_DAY;
         }
         BASE_DAY = baseDay + 1;
     }
 
     // 2013-10-23 10:13:04.945
     public static void writeDate(ByteBuffer outputBuf, long time) {
-        final int dayno = (int) (time / SECS_DAY);
+        final int dayno = (int) (time / MSECS_DAY);
         final int basedDayNo = dayno - BASE_DAY;
         if (basedDayNo < 0 || basedDayNo >= DAY_TO_YEAR_MONTH.length) {
             logger.error("Timestamp {} is out of range", time);
@@ -252,7 +250,7 @@ public class LogLineParser {
                 outputBuf.put((byte) ' ');
             }
             {
-                int dayClock = (int) (time % SECS_DAY);
+                int dayClock = (int) (time % MSECS_DAY);
                 final int ms = dayClock % 1000;
                 dayClock /= 1000L;
                 {

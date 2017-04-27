@@ -2,17 +2,33 @@ package org.dan.tracer;
 
 import static java.nio.ByteBuffer.wrap;
 import static java.util.Arrays.asList;
-import static org.dan.tracer.LogLineParser.readEpochTimeStamp;
+import static org.dan.tracer.LogLineParser.readTimeStamp;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import java.nio.ByteOrder;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
 public class LogLineParserFuncTest {
     private DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+
+    @Test
+    public void parseZeroDate() {
+       assertEquals(0L, readTimeStamp(wrap("1970-01-01T00:00:00.000Z ".getBytes()).order(ByteOrder.LITTLE_ENDIAN)));
+    }
+
+    @Test
+    public void parseFirstSecond() {
+        assertEquals(60000L, readTimeStamp(wrap("1970-01-01T00:00:01.000Z ".getBytes())));
+    }
+
+    @Test
+    public void parseHourSecond() {
+        assertEquals(3600 * 1000L, readTimeStamp(wrap("1970-01-01T00:01:00.000Z ".getBytes())));
+    }
 
     @Test
     public void parseDate() {
@@ -22,7 +38,7 @@ public class LogLineParserFuncTest {
             TemporalAccessor expectedParsed = formatter.parse(date);
             long expected = expectedParsed.getLong(ChronoField.NANO_OF_SECOND) +
                     expectedParsed.getLong(ChronoField.INSTANT_SECONDS);
-            assertEquals(date, expected, readEpochTimeStamp(wrap((date + " ").getBytes())));
+            assertEquals(date, expected, readTimeStamp(wrap((date + " ").getBytes())));
         }
     }
 }
