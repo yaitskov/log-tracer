@@ -25,10 +25,6 @@ public class Request {
         return snapMap.get(id);
     }
 
-    public long getRequestId() {
-        return requestId;
-    }
-
     public int writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf,
             Dictionary dictionary) {
         final Snap root = snapMap.get(NULL_SPAN);
@@ -54,14 +50,6 @@ public class Request {
 
     public long getOldestLine() {
         return oldestLine;
-    }
-
-    public void setOldestLine(long oldestLine) {
-        this.oldestLine = oldestLine;
-    }
-
-    public Map<Long, Snap> getSnapMap() {
-        return snapMap;
     }
 
     public String toString() {
