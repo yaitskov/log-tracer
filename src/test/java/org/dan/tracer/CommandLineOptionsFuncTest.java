@@ -60,4 +60,16 @@ public class CommandLineOptionsFuncTest {
             Files.deleteIfExists(output);
         }
     }
+
+    @Test
+    public void overrideReadBuffer() throws IOException {
+        options.parse(new String[] {"-rbuf", "12345"});
+        assertEquals(options.getReadBufferBytes(), 12345);
+    }
+
+    @Test
+    public void overrideWriteBuffer() throws IOException {
+        options.parse(new String[] {"-wbuf", "12345"});
+        assertEquals(options.getWriteBufferBytes(), 12345);
+    }
 }
