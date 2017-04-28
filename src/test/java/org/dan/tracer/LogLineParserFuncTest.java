@@ -144,4 +144,32 @@ public class LogLineParserFuncTest {
         assertEquals(1, callback[0]);
         assertEquals("ser8", dictionary.getById(1));
     }
+
+    @Test
+    public void parseSearchNewLineNextTraceLine() {
+        Dictionary dictionary = Dictionary.create();
+        int[] callback = new int[1];
+        RequestRepo repo = new RequestRepo(null, null, null) {
+            @Override
+            public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
+                ++callback[0];
+                assertEquals(1, serviceId);
+                assertEquals(0L, started);
+                assertEquals(asLong("4twlb5e6"), requestId);
+                assertEquals(3L, ended);
+                assertEquals(asLong("tmrya5qt"), callerSnapId);
+                assertEquals(asLong("vmrya5qg"), snapId);
+            }
+        };
+        LogLineParser logLineParser = new LogLineParser(dictionary, repo);
+        logLineParser.setSearchNewLine(true);
+        ByteBuffer input = input(
+                "asdfasdfa 345234513 sdfa sdfasdf\n1970-01-01T00:00:00.000Z " +
+                        "1970-01-01T00:00:00.003Z 4twlb5e6 ser8 tmrya5qt->vmrya5qg\n");
+        assertEquals(0, logLineParser.parse(input));
+        final long lastTs = logLineParser.parse(input);
+        assertEquals(3L, lastTs);
+        assertEquals(1, callback[0]);
+        assertEquals("ser8", dictionary.getById(1));
+    }
 }
