@@ -1,6 +1,5 @@
 package org.dan.tracer;
 
-import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.IOException;
@@ -9,8 +8,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 public class EntryPoint {
-    private static final int CHECK_AUTO_END_AFTER_LINES = 10000;
-
     public static void main(final String[] args) throws IOException {
         final CommandLineOptions options = new CommandLineOptions();
         options.parse(args);
