@@ -14,13 +14,15 @@ public class EntryPoint {
         final ReadableByteChannel inputCh = options.getInputCh();
         final WritableByteChannel outputCh = options.getOutputCh();
         final Dictionary serviceDictionary = Dictionary.create();
-        final ByteBuffer outputBuf = ByteBuffer.allocate(options.getWriteBufferBytes())
+        final ByteBuffer outputBuf = ByteBuffer
+                .allocateDirect(options.getWriteBufferBytes())
                 .order(LITTLE_ENDIAN);
         final RequestRepo requestRepo = new RequestRepo(
                 serviceDictionary, outputCh, outputBuf);
         final LogLineParser logLineParser = new LogLineParser(
                 serviceDictionary, requestRepo);
-        final ByteBuffer inputBuf = ByteBuffer.allocate(options.getReadBufferBytes())
+        final ByteBuffer inputBuf = ByteBuffer
+                .allocateDirect(options.getReadBufferBytes())
                 .order(LITTLE_ENDIAN);
 
         reconstructTraces(options, inputCh, outputCh, outputBuf,
