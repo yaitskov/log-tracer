@@ -63,4 +63,8 @@ public class RequestRepo {
         logger.info("Auto end at {} removed requests {} and {} of them were complete",
                     oldestTime, originalSize - requests.size(), complete);
     }
+
+    Map<Long, Request> getRequests() {
+        return requests;
+    }
 }
