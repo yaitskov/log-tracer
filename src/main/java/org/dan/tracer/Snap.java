@@ -10,6 +10,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class Snap implements Comparable<Snap> {
+    private static final byte[] START_BYTES = "{\"start\":\"".getBytes();
+    private static final byte[] END_BYTES = ",\"end\":\"".getBytes();
+    private static final byte[] SERVICE_BYTES = ",\"service\":\"".getBytes();
+    private static final byte[] CALLS_BYTES = "\",\"calls\":[".getBytes();
+
     private final List<Snap> children = new ArrayList<>();
     private final long id;
     private int serviceId;
@@ -62,16 +67,16 @@ public class Snap implements Comparable<Snap> {
     public void writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf,
                             Dictionary serviceDictionary) {
         ensureSpace(100, outputCh, outputBuf);
-        outputBuf.put("{\"start\":\"".getBytes());
+        outputBuf.put(START_BYTES);
         writeDate(outputBuf, started);
-        outputBuf.put(",\"end\":\"".getBytes());
+        outputBuf.put(END_BYTES);
         writeDate(outputBuf, ended);
-        outputBuf.put(",\"service\":\"".getBytes());
+        outputBuf.put(SERVICE_BYTES);
         outputBuf.put(serviceDictionary.getById(serviceId).getBytes());
         if (children.isEmpty()) {
             outputBuf.put((byte) '"');
         } else {
-            outputBuf.put("\",\"calls\":[".getBytes());
+            outputBuf.put(CALLS_BYTES);
             Collections.sort(children);
             children.get(0).writeAsJson(outputCh, outputBuf, serviceDictionary);
             for (int i = 1; i < children.size(); ++i) {

@@ -12,6 +12,9 @@ import java.util.Map;
 
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
+    private static final byte[] ID_BYTES = "{\"id\":\"".getBytes();
+    private static final byte[] ROOT_BYTES = "\",root:".getBytes();
+    private static final byte[] TERMINATOR_BYTES = "}\n".getBytes();
 
     private final Map<Long, Snap> snapMap = new HashMap<>();
     private final long requestId;
@@ -32,11 +35,11 @@ public class Request {
             logger.error("Drop request {} without root span", this);
             return 0;
         }
-        outputBuf.put("{\"id\":\"".getBytes())
+        outputBuf.put(ID_BYTES)
             .putLong(requestId)
-            .put("\",root:".getBytes());
+            .put(ROOT_BYTES);
         root.writeAsJson(outputCh, outputBuf, dictionary);
-        outputBuf.put("}\n".getBytes());
+        outputBuf.put(TERMINATOR_BYTES);
         return 1;
     }
 
