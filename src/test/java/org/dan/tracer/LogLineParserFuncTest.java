@@ -55,4 +55,36 @@ public class LogLineParserFuncTest {
             assertEquals(date, d.getTime(), readTimeStamp(wrap(date + " ")));
         }
     }
+
+    @Test
+    public void formatZero() throws ParseException {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+        parser.format(new Date(0));
+        for (long date : asList(
+                0L, 1000L, 60L * 1000L,
+                3600L * 1000L, 24L * 3600L * 1000L,
+                1000000L, 10000000L,
+                parser.parse("1970-01-02 00:00:00.000").getTime(),
+                parser.parse("1970-02-03 00:00:00.000").getTime(),
+                parser.parse("1970-03-11 00:00:00.000").getTime(),
+                parser.parse("1971-01-01 00:00:00.000").getTime(),
+                parser.parse("1972-01-01 00:00:00.000").getTime(),
+                parser.parse("1973-01-01 00:00:00.000").getTime(),
+                parser.parse("1973-03-01 00:00:00.000").getTime(),
+                parser.parse("1973-02-28 00:00:00.000").getTime(),
+                parser.parse("1976-02-29 23:00:00.000").getTime(),
+                parser.parse("1973-03-01 23:59:59.000").getTime(),
+                parser.parse("2015-12-31 23:59:59.999").getTime(),
+                System.currentTimeMillis())) {
+            assertEquals(parser.format(new Date(date)), format(date));
+        }
+    }
+
+    private String format(long ts) {
+        ByteBuffer b = ByteBuffer.allocate(40);
+        LogLineParser.writeDate(b, ts);
+        b.flip();
+        return new String(b.array(), 0, b.limit());
+    }
 }

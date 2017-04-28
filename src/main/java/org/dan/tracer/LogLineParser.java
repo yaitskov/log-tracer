@@ -194,42 +194,34 @@ public class LogLineParser {
             31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
             31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    private static final int BASE_DAY;
-    private static final int BASE_YEAR;
+    private static final int BASE_YEAR = 1970;
     private static final int[] DAY_TO_YEAR_MONTH;
     private static final long[] YEAR_TO_MS;
 
     static  {
-        BASE_YEAR = 1970; //now.getYear() - 6;
         final int stopYear = now.getYear() + 2;
         DAY_TO_YEAR_MONTH = new int[(stopYear - BASE_YEAR) * 366];
         YEAR_TO_MS = new long[stopYear - BASE_YEAR];
-        int baseDay = 0;
         int dayno = 0;
         long yearMs = 0;
         for (int year = 1970; year < stopYear; ++year) {
             int leapShift = leapyear(year) ? 12 : 0;
             for (int month = 0; month < 12; ++month) {
                 final int days = DAYS_PER_MONTH[month + leapShift];
-                for (int day = 1; day < days; ++day) {
-                    if (year >= BASE_YEAR) {
-                        YEAR_TO_MS[year - BASE_YEAR] = yearMs;
-                        DAY_TO_YEAR_MONTH[dayno - baseDay] = year << 9 | (day << 4) | (month + 1);
-                    } else {
-                        baseDay = dayno;
-                    }
+                for (int day = 1; day <= days; ++day) {
+                    YEAR_TO_MS[year - BASE_YEAR] = yearMs;
+                    DAY_TO_YEAR_MONTH[dayno] = year << 9 | (day << 4) | (month + 1);
                     ++dayno;
                 }
             }
             yearMs += (leapShift / 12L + 365L) * MSECS_DAY;
         }
-        BASE_DAY = baseDay + 1;
     }
 
     // 2013-10-23 10:13:04.945
     public static void writeDate(ByteBuffer outputBuf, long time) {
         final int dayno = (int) (time / MSECS_DAY);
-        final int basedDayNo = dayno - BASE_DAY;
+        final int basedDayNo = dayno;
         if (basedDayNo < 0 || basedDayNo >= DAY_TO_YEAR_MONTH.length) {
             logger.error("Timestamp {} is out of range", time);
             outputBuf.put("0000-00-00 00:00:00.000".getBytes());
@@ -273,11 +265,12 @@ public class LogLineParser {
     }
 
     private static void writeIntAsStr(ByteBuffer outputBuf, int n, int width) {
-        outputBuf.position(outputBuf.position() + width);
+        int pos = outputBuf.position() + width;
+        outputBuf.position(pos);
         while (true) {
-            outputBuf.put(outputBuf.position() + width, (byte) ('0' + (n % 10)));
+            outputBuf.put(--pos, (byte) ('0' + (n % 10)));
             n /= 10;
-            if (width-- == 0) {
+            if (--width <= 0) {
                 break;
             }
         }
