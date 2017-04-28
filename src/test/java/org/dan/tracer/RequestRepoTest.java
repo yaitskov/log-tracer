@@ -56,9 +56,9 @@ public class RequestRepoTest {
     }
 
     @Test
-    public void firstFirstLine() {
-        requestRepo.line(SERVICE_ID, REQUEST_ID, STARTED + 1, ENDED - 1, SNAP_A, SNAP_B);
+    public void lineOfNestedTraceComesLast() {
         requestRepo.line(SERVICE_ID, REQUEST_ID, STARTED, ENDED, NULL_SPAN, SNAP_A);
+        requestRepo.line(SERVICE_ID, REQUEST_ID, STARTED + 1, ENDED - 1, SNAP_A, SNAP_B);
         checkSnapsAB();
     }
 
