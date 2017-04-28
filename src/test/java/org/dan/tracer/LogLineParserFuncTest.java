@@ -4,6 +4,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.asList;
 import static org.dan.tracer.LogLineParser.readTimeStamp;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -171,5 +172,23 @@ public class LogLineParserFuncTest {
         assertEquals(3L, lastTs);
         assertEquals(1, callback[0]);
         assertEquals("ser8", dictionary.getById(1));
+    }
+
+    @Test
+    public void turnOnSearchNewLine() {
+        Dictionary dictionary = Dictionary.create();
+        int[] callback = new int[1];
+        RequestRepo repo = new RequestRepo(null, null, null) {
+            @Override
+            public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
+                ++callback[0];
+            }
+        };
+        LogLineParser logLineParser = new LogLineParser(dictionary, repo);
+        logLineParser.setSearchNewLine(true);
+        ByteBuffer input = input("1970-01-01T00:00:00.000Z~");
+        assertEquals(0, logLineParser.parse(input));
+        assertEquals(0, callback[0]);
+        assertTrue(logLineParser.isSearchNewLine());
     }
 }

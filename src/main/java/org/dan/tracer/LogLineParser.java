@@ -30,6 +30,10 @@ public class LogLineParser {
         this.searchNewLine = searchNewLine;
     }
 
+    boolean isSearchNewLine() {
+        return searchNewLine;
+    }
+
     public LogLineParser(Dictionary serviceDictionary, RequestRepo requestRepo) {
         this.serviceDictionary = serviceDictionary;
         this.requestRepo = requestRepo;
