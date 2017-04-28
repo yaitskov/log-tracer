@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -29,12 +30,34 @@ public class CommandLineOptionsFuncTest {
             final ReadableByteChannel defaultInput = options.getInputCh();
             options.parse(new String[] {"-in", input.toString()});
             assertFalse(defaultInput == options.getInputCh());
-            ByteBuffer buf = ByteBuffer.allocate(5);
-            options.getInputCh().read(buf);
-            buf.flip();
-            assertEquals("hello", new String(buf.array()));
+            try {
+                ByteBuffer buf = ByteBuffer.allocate(5);
+                options.getInputCh().read(buf);
+                buf.flip();
+                assertEquals("hello", new String(buf.array()));
+            } finally {
+                options.getInputCh().close();
+            }
         } finally {
             Files.deleteIfExists(input);
+        }
+    }
+
+    @Test
+    public void overrideOutput() throws IOException {
+        final Path output = Files.createTempFile("output", "xx");
+        try {
+            final WritableByteChannel defaultOutput = options.getOutputCh();
+            options.parse(new String[] {"-out", output.toString()});
+            assertFalse(defaultOutput == options.getOutputCh());
+            try {
+                options.getOutputCh().write(ByteBuffer.wrap("hello".getBytes()));
+                assertEquals("hello", new String(Files.readAllBytes(output)));
+            } finally {
+                options.getOutputCh().close();
+            }
+        } finally {
+            Files.deleteIfExists(output);
         }
     }
 }

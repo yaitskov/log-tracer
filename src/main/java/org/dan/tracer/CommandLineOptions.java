@@ -95,7 +95,7 @@ public class CommandLineOptions {
 
     private void openOutput(String s) {
         try {
-            inputCh = new FileOutputStream(s).getChannel();
+            outputCh = new FileOutputStream(s).getChannel();
         } catch (FileNotFoundException e) {
             error("Failed to open file {}", s, e);
         }
