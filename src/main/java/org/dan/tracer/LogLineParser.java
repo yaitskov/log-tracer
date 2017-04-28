@@ -21,6 +21,7 @@ public class LogLineParser {
     private static final char LINE_END = '\n';
     private static final int[] DAYS_IN_MONTH = sum(
             0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+    public static final byte[] ZERO_TIME_BYTES = "0000-00-00 00:00:00.000".getBytes();
 
     private final Dictionary serviceDictionary;
     private final RequestRepo requestRepo;
@@ -234,7 +235,7 @@ public class LogLineParser {
         final int basedDayNo = dayno;
         if (basedDayNo < 0 || basedDayNo >= DAY_TO_YEAR_MONTH.length) {
             logger.error("Timestamp {} is out of range", time);
-            outputBuf.put("0000-00-00 00:00:00.000".getBytes());
+            outputBuf.put(ZERO_TIME_BYTES);
         } else {
             {
                 final int yearDayMonth = DAY_TO_YEAR_MONTH[basedDayNo];
@@ -284,5 +285,11 @@ public class LogLineParser {
                 break;
             }
         }
+    }
+
+    public static String timeToString(long time) {
+        ByteBuffer b = ByteBuffer.allocate(ZERO_TIME_BYTES.length);
+        writeDate(b, time);
+        return new String(b.array());
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,8 @@ public class Request {
     }
 
     public String toString() {
-        return Long.toHexString(requestId);
+        ByteBuffer b = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
+        b.putLong(requestId);
+        return new String(b.array());
     }
 }

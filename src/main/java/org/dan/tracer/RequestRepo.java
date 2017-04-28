@@ -60,8 +60,12 @@ public class RequestRepo {
                 complete += request.writeAsJson(outputCh, outputBuf, serviceDictionary);
             }
         }
-        logger.info("Auto end at {} removed requests {} and {} of them were complete",
-                    oldestTime, originalSize - requests.size(), complete);
+        if (logger.isInfoEnabled()) {
+            logger.info("Auto end at {} removed requests {} and {} of them were complete",
+                    LogLineParser.timeToString(oldestTime),
+                    originalSize - requests.size(),
+                    complete);
+        }
     }
 
     Map<Long, Request> getRequests() {
