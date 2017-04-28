@@ -23,6 +23,15 @@ public class EntryPoint {
         final ByteBuffer inputBuf = ByteBuffer.allocate(options.getReadBufferBytes())
                 .order(LITTLE_ENDIAN);
 
+        reconstructTraces(options, inputCh, outputCh, outputBuf,
+                requestRepo, logLineParser, inputBuf);
+    }
+
+    public static void reconstructTraces(CommandLineOptions options,
+            ReadableByteChannel inputCh, WritableByteChannel outputCh,
+            ByteBuffer outputBuf, RequestRepo requestRepo,
+            LogLineParser logLineParser,
+            ByteBuffer inputBuf) throws IOException {
         int linesSinceAutoEnd = 0;
         long oldestTime = 0;
         try {
