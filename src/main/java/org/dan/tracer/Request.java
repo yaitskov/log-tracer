@@ -1,6 +1,7 @@
 package org.dan.tracer;
 
 import static org.dan.tracer.LogLineParser.NULL_SPAN;
+import static org.dan.tracer.Span.ensureSpace;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class Request {
             logger.error("Drop request {} without root span", this);
             return 0;
         }
+        ensureSpace(100, outputCh, outputBuf);
         outputBuf.put(ID_BYTES)
             .putLong(requestId)
             .put(ROOT_BYTES);
