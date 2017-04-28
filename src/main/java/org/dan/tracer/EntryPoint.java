@@ -37,10 +37,13 @@ public class EntryPoint {
         try {
             while (true) {
                 final int read = inputCh.read(inputBuf);
+                inputBuf.flip();
                 if (read < 0) {
+                    while (inputBuf.remaining() > 74) {
+                        logLineParser.parse(inputBuf);
+                    }
                     break;
                 }
-                inputBuf.flip();
                 while (inputBuf.remaining() > options.getMaxLineLength()) {
                     oldestTime = Math.max(oldestTime, logLineParser.parse(inputBuf));
                     ++linesSinceAutoEnd;
