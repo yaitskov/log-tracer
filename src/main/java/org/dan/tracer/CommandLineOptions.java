@@ -55,28 +55,28 @@ public class CommandLineOptions {
         for (int i = 0; i < args .length; ++i) {
             switch (args[i]) {
                 case "-in":
-                    openInput(optionStringArg(args, i++));
+                    openInput(optionStringArg(args, ++i));
                     break;
                 case "-out":
-                    openOutput(optionStringArg(args, i++));
+                    openOutput(optionStringArg(args, ++i));
                     break;
                 case "-help":
                     printHelp();
                     break;
                 case "-flush-check":
-                    flushLineCheck = optionIntArg(args, i++);
+                    flushLineCheck = optionIntArg(args, ++i);
                     break;
                 case "-rbuf":
-                    readBufferBytes = optionIntArg(args, i++);
+                    readBufferBytes = optionIntArg(args, ++i);
                     break;
                 case "-max-line":
-                    maxLineLength = optionIntArg(args, i++);
+                    maxLineLength = optionIntArg(args, ++i);
                     break;
                 case "-wbuf":
-                    writeBufferBytes = optionIntArg(args, i++);
+                    writeBufferBytes = optionIntArg(args, ++i);
                     break;
                 case "-expire-minute":
-                    expireRequestAfterMs = MINUTES.toMillis(optionIntArg(args, i++));
+                    expireRequestAfterMs = MINUTES.toMillis(optionIntArg(args, ++i));
                     break;
                 default:
                     error("Unknown option [{}] among [{}]", args[i],
