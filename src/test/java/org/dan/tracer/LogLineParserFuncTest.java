@@ -105,9 +105,11 @@ public class LogLineParserFuncTest {
             }
         };
         LogLineParser logLineParser = new LogLineParser(dictionary, repo);
-        logLineParser.parse(input("1970-01-01T00:00:00.000Z 1970-01-01T00:00:00.003Z 4twlb5e6 service8 null->vmrya5qg\n"));
+        final long lastTs = logLineParser.parse(input(
+                "1970-01-01T00:00:00.000Z 1970-01-01T00:00:00.003Z 4twlb5e6 service8 null->vmrya5qg\n"));
 
         assertEquals(1, callback[0]);
+        assertEquals(3L, lastTs);
         assertEquals("service8", dictionary.getById(1));
     }
 
@@ -136,8 +138,9 @@ public class LogLineParserFuncTest {
             }
         };
         LogLineParser logLineParser = new LogLineParser(dictionary, repo);
-        logLineParser.parse(input("1970-01-01T00:00:00.000Z 1970-01-01T00:00:00.003Z 4twlb5e6 ser8 tmrya5qt->vmrya5qg\n"));
-
+        final long lastTs = logLineParser.parse(input(
+                "1970-01-01T00:00:00.000Z 1970-01-01T00:00:00.003Z 4twlb5e6 ser8 tmrya5qt->vmrya5qg\n"));
+        assertEquals(3L, lastTs);
         assertEquals(1, callback[0]);
         assertEquals("ser8", dictionary.getById(1));
     }
