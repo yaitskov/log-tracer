@@ -40,7 +40,7 @@ public class EntryPoint {
                 inputBuf.flip();
                 if (read < 0) {
                     while (inputBuf.remaining() > 74) {
-                        logLineParser.parse(inputBuf);
+                        oldestTime = Math.max(oldestTime, logLineParser.parse(inputBuf));
                     }
                     break;
                 }
@@ -56,6 +56,7 @@ public class EntryPoint {
             }
             requestRepo.autoEnd(oldestTime, 0);
         } finally {
+            outputBuf.flip();
             outputCh.write(outputBuf);
             outputCh.close();
         }
