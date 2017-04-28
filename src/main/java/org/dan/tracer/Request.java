@@ -34,7 +34,7 @@ public class Request {
             Dictionary dictionary) {
         final Span root = snapMap.get(NULL_SPAN);
         if (root == null || root.getChildren().isEmpty()) {
-            logger.error("Drop request {} without root span", this);
+            logger.info("Drop request {} without root span", this);
             return 0;
         }
         ensureSpace(100, outputCh, outputBuf);

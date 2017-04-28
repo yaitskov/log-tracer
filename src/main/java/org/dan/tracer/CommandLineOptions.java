@@ -139,7 +139,9 @@ public class CommandLineOptions {
                 + "    -flush-check    - check expired requests after N log lines are consumed\n"
                 + "    -max-line       - max expected length of a log line\n"
                 + "    -expire-minute  - max difference for request between \n"
-                + "                      the newest line and newer request line\n");
+                + "                      the newest line and newer request line\n"
+                + "                      logging is configured via \n"
+                + "                      -DLOG_LEVEL=INFO for jvm\n");
         System.exit(1);
     }
 }
