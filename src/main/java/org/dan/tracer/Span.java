@@ -20,7 +20,6 @@ public class Span implements Comparable<Span> {
     private int serviceId;
     private long started;
     private long ended;
-    private Span parent;
 
     public Span(long id) {
         this.id = id;
@@ -46,8 +45,13 @@ public class Span implements Comparable<Span> {
     }
 
     public void addChild(Span span) {
-        span.setParent(this);
-        children.add(span);
+        for (int i = children.size() - 1; i >= 0; --i) {
+            if (children.get(i).getStarted() < span.getStarted()) {
+                children.add(i + 1, span);
+                return;
+            }
+        }
+        children.add(0, span);
     }
 
     public static void ensureSpace(final int minFreeSpace,
@@ -77,7 +81,6 @@ public class Span implements Comparable<Span> {
             outputBuf.put((byte) '"');
         } else {
             outputBuf.put(CALLS_BYTES);
-            Collections.sort(children);
             children.get(0).writeAsJson(outputCh, outputBuf, serviceDictionary);
             for (int i = 1; i < children.size(); ++i) {
                 outputBuf.put((byte) ',');
@@ -110,14 +113,6 @@ public class Span implements Comparable<Span> {
 
     public void setEnded(long ended) {
         this.ended = ended;
-    }
-
-    public Span getParent() {
-        return parent;
-    }
-
-    public void setParent(Span parent) {
-        this.parent = parent;
     }
 
     public List<Span> getChildren() {

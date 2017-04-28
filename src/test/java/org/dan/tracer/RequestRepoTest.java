@@ -4,7 +4,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.dan.tracer.LogLineParser.NULL_SPAN;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,9 +66,6 @@ public class RequestRepoTest {
         Span spanA = req.getSnap(SNAP_A);
         Span spanB = req.getSnap(SNAP_B);
 
-        assertEquals(spanB.getParent(), spanA);
-        assertNull(spanA.getParent().getParent());
-        assertEquals(NULL_SPAN, spanA.getParent().getId());
         assertEquals(spanB.getChildren(), emptyList());
         assertEquals(spanA.getChildren(), singletonList(spanB));
         assertEquals(spanA.getStarted(), STARTED);
@@ -82,7 +78,6 @@ public class RequestRepoTest {
         assertEquals(spanB.getEnded(), ENDED - 1);
         assertEquals(spanB.getServiceId(), SERVICE_ID);
     }
-
 
     @Test
     public void lineOfNestedTraceFirst() {

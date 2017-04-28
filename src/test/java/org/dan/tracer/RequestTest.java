@@ -13,6 +13,7 @@ public class RequestTest {
     public static final String REQUEST_ID = "12345678";
     public static final long SNAP_A = asLong("abcdefgh");
     public static final long SNAP_B = asLong("zxydefgh");
+    public static final long SNAP_C = asLong("zxyklmnh");
 
     public static final int SERVICE1_ID = 1;
     public static final int SERVICE2_ID = 2;
@@ -96,6 +97,13 @@ public class RequestTest {
             subSpan.addChild(child2);
         }
         {
+            Span child3 = new Span(SNAP_C);
+            child3.setStarted(8);
+            child3.setEnded(9);
+            child3.setServiceId(SERVICE2_ID);
+            subSpan.addChild(child3);
+        }
+        {
             Span child1 = new Span(SNAP_B);
             child1.setStarted(4);
             child1.setEnded(5);
@@ -116,6 +124,9 @@ public class RequestTest {
                         + "\"service\":\"service2\"},"
                         + "{\"start\":\""
                         + "1970-01-01 00:00:00.005\",\"end\":\"1970-01-01 00:00:00.007\","
+                        + "\"service\":\"service2\"},"
+                        + "{\"start\":\""
+                        + "1970-01-01 00:00:00.008\",\"end\":\"1970-01-01 00:00:00.009\","
                         + "\"service\":\"service2\"}]}}\n",
                 new String(buffer.array(), 0, buffer.limit()));
     }
