@@ -11,8 +11,8 @@ import java.util.List;
 
 public class Snap implements Comparable<Snap> {
     private static final byte[] START_BYTES = "{\"start\":\"".getBytes();
-    private static final byte[] END_BYTES = ",\"end\":\"".getBytes();
-    private static final byte[] SERVICE_BYTES = ",\"service\":\"".getBytes();
+    private static final byte[] END_BYTES = "\",\"end\":\"".getBytes();
+    private static final byte[] SERVICE_BYTES = "\",\"service\":\"".getBytes();
     private static final byte[] CALLS_BYTES = "\",\"calls\":[".getBytes();
 
     private final List<Snap> children = new ArrayList<>();

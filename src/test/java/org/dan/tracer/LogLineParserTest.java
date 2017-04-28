@@ -118,7 +118,7 @@ public class LogLineParserTest {
         return ByteBuffer.wrap(text.getBytes()).order(LITTLE_ENDIAN);
     }
 
-    private static long asLong(String s) {
+    static long asLong(String s) {
         return ByteBuffer.wrap(s.getBytes()).order(LITTLE_ENDIAN).getLong();
     }
 

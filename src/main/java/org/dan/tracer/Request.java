@@ -13,7 +13,7 @@ import java.util.Map;
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
     private static final byte[] ID_BYTES = "{\"id\":\"".getBytes();
-    private static final byte[] ROOT_BYTES = "\",root:".getBytes();
+    private static final byte[] ROOT_BYTES = "\",\"root\":".getBytes();
     private static final byte[] TERMINATOR_BYTES = "}\n".getBytes();
 
     private final Map<Long, Snap> snapMap = new HashMap<>();
@@ -31,14 +31,14 @@ public class Request {
     public int writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf,
             Dictionary dictionary) {
         final Snap root = snapMap.get(NULL_SPAN);
-        if (root == null) {
+        if (root == null || root.getChildren().isEmpty()) {
             logger.error("Drop request {} without root span", this);
             return 0;
         }
         outputBuf.put(ID_BYTES)
             .putLong(requestId)
             .put(ROOT_BYTES);
-        root.writeAsJson(outputCh, outputBuf, dictionary);
+        root.getChildren().get(0).writeAsJson(outputCh, outputBuf, dictionary);
         outputBuf.put(TERMINATOR_BYTES);
         return 1;
     }
