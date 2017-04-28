@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class LogLineParserFuncTest {
+public class LogLineParserTest {
     public static ByteBuffer wrap(String s) {
         return ByteBuffer.wrap(s.getBytes()).order(LITTLE_ENDIAN);
     }

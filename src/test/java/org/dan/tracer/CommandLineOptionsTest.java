@@ -14,7 +14,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class CommandLineOptionsFuncTest {
+public class CommandLineOptionsTest {
     private CommandLineOptions options;
 
     @Before
