@@ -3,14 +3,14 @@ package org.dan.tracer;
 import static org.dan.tracer.LogLineParser.NULL_SPAN;
 import static org.dan.tracer.Span.ensureSpace;
 
+import com.koloboke.collect.map.hash.HashLongObjMap;
+import com.koloboke.collect.map.hash.HashLongObjMaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
@@ -18,7 +18,7 @@ public class Request {
     private static final byte[] ROOT_BYTES = "\",\"root\":".getBytes();
     private static final byte[] TERMINATOR_BYTES = "}\n".getBytes();
 
-    private final Map<Long, Span> snapMap = new HashMap<>();
+    private final HashLongObjMap<Span> snapMap = HashLongObjMaps.newMutableMap();
     private final long requestId;
     private long oldestLine;
 

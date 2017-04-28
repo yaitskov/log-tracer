@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Span implements Comparable<Span> {

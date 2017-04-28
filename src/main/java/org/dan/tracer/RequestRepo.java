@@ -1,11 +1,12 @@
 package org.dan.tracer;
 
+import com.koloboke.collect.map.hash.HashLongObjMap;
+import com.koloboke.collect.map.hash.HashLongObjMaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class RequestRepo {
     private final Dictionary serviceDictionary;
     private final WritableByteChannel outputCh;
     private final ByteBuffer outputBuf;
-    private final Map<Long, Request> requests = new HashMap<>();
+    private final HashLongObjMap<Request> requests = HashLongObjMaps.newMutableMap();
 
     public RequestRepo(Dictionary serviceDictionary,
                        WritableByteChannel outputCh,
