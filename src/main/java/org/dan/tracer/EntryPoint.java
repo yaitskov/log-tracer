@@ -18,7 +18,7 @@ public class EntryPoint {
         final WritableByteChannel outputCh = options.getOutputCh();
         final Dictionary serviceDictionary = Dictionary.create();
         final ByteBuffer outputBuf = ByteBuffer.allocate(options.getWriteBufferBytes())
-                .order(BIG_ENDIAN);
+                .order(LITTLE_ENDIAN);
         final RequestRepo requestRepo = new RequestRepo(
                 serviceDictionary, outputCh, outputBuf);
         final LogLineParser logLineParser = new LogLineParser(

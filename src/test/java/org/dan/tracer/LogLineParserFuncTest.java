@@ -1,5 +1,6 @@
 package org.dan.tracer;
 
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.asList;
 import static org.dan.tracer.LogLineParser.readTimeStamp;
 import static org.junit.Assert.assertEquals;
@@ -7,7 +8,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,7 +15,7 @@ import java.util.TimeZone;
 
 public class LogLineParserFuncTest {
     public static ByteBuffer wrap(String s) {
-        return ByteBuffer.wrap(s.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+        return ByteBuffer.wrap(s.getBytes()).order(LITTLE_ENDIAN);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class LogLineParserFuncTest {
     }
 
     private String format(long ts) {
-        ByteBuffer b = ByteBuffer.allocate(40);
+        ByteBuffer b = ByteBuffer.allocate(40).order(LITTLE_ENDIAN);
         LogLineParser.writeDate(b, ts);
         b.flip();
         return new String(b.array(), 0, b.limit());
