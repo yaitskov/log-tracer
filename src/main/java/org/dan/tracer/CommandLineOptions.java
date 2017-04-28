@@ -132,6 +132,8 @@ public class CommandLineOptions {
     private void printHelp() {
         logger.info("Usage: tracer [ -in log_file ] [ -out trace_file ] [ ... ]\n"
                 + "  Options: \n"
+                + "    -in             - path to input log file instead of stdin\n"
+                + "    -out            - path to output trace file instead of stdout\n"
                 + "    -rbuf           - size of read buffer in bytes\n"
                 + "    -wbuf           - size of write buffer in bytes\n"
                 + "    -flush-check    - check expired requests after N log lines are consumed\n"
