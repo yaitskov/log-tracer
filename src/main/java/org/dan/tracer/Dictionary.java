@@ -20,7 +20,7 @@ public class Dictionary {
     public int add(String word) {
          int id = byName.getOrDefault(word, 0);
          if (id == 0) {
-             byId.put(id = byId.size(), word);
+             byId.put(id = byId.size() + 1, word);
              byName.put(word, id);
          }
          return id;

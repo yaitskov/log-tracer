@@ -100,7 +100,7 @@ public class LogLineParserFuncTest {
                 assertEquals(0L, started);
                 assertEquals(asLong("4twlb5e6"), requestId);
                 assertEquals(3L, ended);
-                assertEquals(asLong("null->"), callerSnapId);
+                assertEquals(asLong("null->  ") & (~0L >>> 16), callerSnapId);
                 assertEquals(asLong("vmrya5qg"), snapId);
             }
         };

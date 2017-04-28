@@ -62,8 +62,8 @@ public class LogLineParser {
             return 0;
         }
         long callerSpan = in.getLong();
-        if (callerSpan >>> 16 == NULL_SPAN) {
-            callerSpan >>>= 16;
+        if ((callerSpan & (~0L >>> 16)) == NULL_SPAN) {
+            callerSpan &= ~0L >>> 16;
             in.position(in.position() - 2);
         } else {
             final short arrow = in.getShort();
@@ -82,8 +82,8 @@ public class LogLineParser {
 
     private static long strToLong(String s) {
         long result = 0;
-        for (int i = 0; i < s.length(); ++i) {
-            result = result << 8 + s.charAt(i);
+        for (int i = s.length() - 1; i >= 0 ; --i) {
+            result = (result << 8) + s.charAt(i);
         }
         return result;
     }
@@ -100,8 +100,10 @@ public class LogLineParser {
             }
         }
         int end = in.position();
-        byte [] token = new byte[end - start];
-        in.get(token, start, token.length);
+        byte [] token = new byte[end - start - 1];
+        in.position(start);
+        in.get(token, 0, token.length);
+        in.position(end); // space
         return new String(token);
     }
 
