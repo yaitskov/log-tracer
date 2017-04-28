@@ -16,8 +16,8 @@ import java.nio.channels.WritableByteChannel;
 public class CommandLineOptions {
     private static final Logger logger = LoggerFactory.getLogger(CommandLineOptions.class);
     private long expireRequestAfterMs = MINUTES.toMillis(3);
-    private int readBufferBytes = 8192;
-    private int writeBufferBytes = 8192;
+    private int readBufferBytes = 1024 * 1024;
+    private int writeBufferBytes = 1024 * 1024;
     private int maxLineLength = 120;
     private int flushLineCheck = 10000;
     private ReadableByteChannel inputCh = Channels.newChannel(System.in);
