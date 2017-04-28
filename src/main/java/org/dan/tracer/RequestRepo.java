@@ -17,6 +17,7 @@ public class RequestRepo {
     private final WritableByteChannel outputCh;
     private final ByteBuffer outputBuf;
     private final HashLongObjMap<Request> requests = HashLongObjMaps.newMutableMap();
+    private int maxSiblings;
 
     public RequestRepo(Dictionary serviceDictionary,
                        WritableByteChannel outputCh,
@@ -45,7 +46,7 @@ public class RequestRepo {
         span.setServiceId(serviceId);
         span.setStarted(started);
         span.setEnded(ended);
-        callerSpan.addChild(span);
+        maxSiblings = Math.max(maxSiblings, callerSpan.addChild(span));
     }
 
     public void autoEnd(final long oldestTime, final long autoEndMs) {
@@ -67,6 +68,10 @@ public class RequestRepo {
                     originalSize - requests.size(),
                     complete);
         }
+    }
+
+    public void logStats() {
+        logger.info("Max span siblings {}", maxSiblings);
     }
 
     Map<Long, Request> getRequests() {

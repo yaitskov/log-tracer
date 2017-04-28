@@ -43,14 +43,16 @@ public class Span implements Comparable<Span> {
         return Long.compare(started, other.started);
     }
 
-    public void addChild(Span span) {
-        for (int i = children.size() - 1; i >= 0; --i) {
+    public int addChild(final Span span) {
+        final int size = children.size();
+        for (int i = size - 1; i >= 0; --i) {
             if (children.get(i).getStarted() < span.getStarted()) {
                 children.add(i + 1, span);
-                return;
+                return size + 1;
             }
         }
         children.add(0, span);
+        return size + 1;
     }
 
     public static void ensureSpace(final int minFreeSpace,

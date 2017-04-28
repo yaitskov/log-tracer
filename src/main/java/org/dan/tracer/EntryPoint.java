@@ -55,6 +55,7 @@ public class EntryPoint {
                 }
             }
             requestRepo.autoEnd(oldestTime, 0);
+            requestRepo.logStats();
         } finally {
             outputBuf.flip();
             outputCh.write(outputBuf);
