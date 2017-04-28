@@ -16,7 +16,7 @@ public class Request {
     private static final byte[] ROOT_BYTES = "\",\"root\":".getBytes();
     private static final byte[] TERMINATOR_BYTES = "}\n".getBytes();
 
-    private final Map<Long, Snap> snapMap = new HashMap<>();
+    private final Map<Long, Span> snapMap = new HashMap<>();
     private final long requestId;
     private long oldestLine;
 
@@ -24,13 +24,13 @@ public class Request {
         this.requestId = requestId;
     }
 
-    public Snap getSnap(long id) {
+    public Span getSnap(long id) {
         return snapMap.get(id);
     }
 
     public int writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf,
             Dictionary dictionary) {
-        final Snap root = snapMap.get(NULL_SPAN);
+        final Span root = snapMap.get(NULL_SPAN);
         if (root == null || root.getChildren().isEmpty()) {
             logger.error("Drop request {} without root span", this);
             return 0;
@@ -43,8 +43,8 @@ public class Request {
         return 1;
     }
 
-    public void addSnap(Snap snap) {
-        snapMap.put(snap.getId(), snap);
+    public void addSnap(Span span) {
+        snapMap.put(span.getId(), span);
     }
 
     public void updateLastTimeStamp(long last) {

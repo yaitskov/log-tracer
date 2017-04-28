@@ -9,20 +9,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Snap implements Comparable<Snap> {
+public class Span implements Comparable<Span> {
     private static final byte[] START_BYTES = "{\"start\":\"".getBytes();
     private static final byte[] END_BYTES = "\",\"end\":\"".getBytes();
     private static final byte[] SERVICE_BYTES = "\",\"service\":\"".getBytes();
     private static final byte[] CALLS_BYTES = "\",\"calls\":[".getBytes();
 
-    private final List<Snap> children = new ArrayList<>();
+    private final List<Span> children = new ArrayList<>();
     private final long id;
     private int serviceId;
     private long started;
     private long ended;
-    private Snap parent;
+    private Span parent;
 
-    public Snap(long id) {
+    public Span(long id) {
         this.id = id;
     }
 
@@ -31,8 +31,8 @@ public class Snap implements Comparable<Snap> {
     }
 
     public boolean equals(Object o) {
-        if (o instanceof Snap) {
-            return id == ((Snap) o).id;
+        if (o instanceof Span) {
+            return id == ((Span) o).id;
         }
         return false;
     }
@@ -41,13 +41,13 @@ public class Snap implements Comparable<Snap> {
         return (int) id;
     }
 
-    public int compareTo(Snap other) {
+    public int compareTo(Span other) {
         return Long.compare(started, other.started);
     }
 
-    public void addChild(Snap snap) {
-        snap.setParent(this);
-        children.add(snap);
+    public void addChild(Span span) {
+        span.setParent(this);
+        children.add(span);
     }
 
     public static void ensureSpace(final int minFreeSpace,
@@ -112,15 +112,15 @@ public class Snap implements Comparable<Snap> {
         this.ended = ended;
     }
 
-    public Snap getParent() {
+    public Span getParent() {
         return parent;
     }
 
-    public void setParent(Snap parent) {
+    public void setParent(Span parent) {
         this.parent = parent;
     }
 
-    public List<Snap> getChildren() {
+    public List<Span> getChildren() {
         return children;
     }
 }

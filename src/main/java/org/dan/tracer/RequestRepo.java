@@ -33,18 +33,18 @@ public class RequestRepo {
             requests.put(requestId, request);
         }
         request.updateLastTimeStamp(ended);
-        Snap callerSnap = request.getSnap(callerSnapId);
-        if (callerSnap == null) {
-            request.addSnap(callerSnap = new Snap(callerSnapId));
+        Span callerSpan = request.getSnap(callerSnapId);
+        if (callerSpan == null) {
+            request.addSnap(callerSpan = new Span(callerSnapId));
         }
-        Snap snap = request.getSnap(snapId);
-        if (snap == null) {
-            request.addSnap(snap = new Snap(snapId));
+        Span span = request.getSnap(snapId);
+        if (span == null) {
+            request.addSnap(span = new Span(snapId));
         }
-        snap.setServiceId(serviceId);
-        snap.setStarted(started);
-        snap.setEnded(ended);
-        callerSnap.addChild(snap);
+        span.setServiceId(serviceId);
+        span.setStarted(started);
+        span.setEnded(ended);
+        callerSpan.addChild(span);
     }
 
     public void autoEnd(final long oldestTime, final long autoEndMs) {

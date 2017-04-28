@@ -6,13 +6,11 @@ import static org.dan.tracer.LogLineParser.NULL_SPAN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.util.Collections;
 
 public class RequestRepoTest {
     public static final int SERVICE_ID = 1;
@@ -66,23 +64,23 @@ public class RequestRepoTest {
         Request req = requestRepo.getRequests().get(REQUEST_ID);
         assertEquals(ENDED, req.getOldestLine());
 
-        Snap snapA = req.getSnap(SNAP_A);
-        Snap snapB = req.getSnap(SNAP_B);
+        Span spanA = req.getSnap(SNAP_A);
+        Span spanB = req.getSnap(SNAP_B);
 
-        assertEquals(snapB.getParent(), snapA);
-        assertNull(snapA.getParent().getParent());
-        assertEquals(NULL_SPAN, snapA.getParent().getId());
-        assertEquals(snapB.getChildren(), emptyList());
-        assertEquals(snapA.getChildren(), singletonList(snapB));
-        assertEquals(snapA.getStarted(), STARTED);
-        assertEquals(snapA.getEnded(), ENDED);
-        assertEquals(snapA.getServiceId(), SERVICE_ID);
-        assertEquals(snapA.getId(), SNAP_A);
+        assertEquals(spanB.getParent(), spanA);
+        assertNull(spanA.getParent().getParent());
+        assertEquals(NULL_SPAN, spanA.getParent().getId());
+        assertEquals(spanB.getChildren(), emptyList());
+        assertEquals(spanA.getChildren(), singletonList(spanB));
+        assertEquals(spanA.getStarted(), STARTED);
+        assertEquals(spanA.getEnded(), ENDED);
+        assertEquals(spanA.getServiceId(), SERVICE_ID);
+        assertEquals(spanA.getId(), SNAP_A);
 
-        assertEquals(snapB.getId(), SNAP_B);
-        assertEquals(snapB.getStarted(), STARTED + 1);
-        assertEquals(snapB.getEnded(), ENDED - 1);
-        assertEquals(snapB.getServiceId(), SERVICE_ID);
+        assertEquals(spanB.getId(), SNAP_B);
+        assertEquals(spanB.getStarted(), STARTED + 1);
+        assertEquals(spanB.getEnded(), ENDED - 1);
+        assertEquals(spanB.getServiceId(), SERVICE_ID);
     }
 
 

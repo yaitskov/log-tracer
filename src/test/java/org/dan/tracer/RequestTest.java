@@ -28,8 +28,8 @@ public class RequestTest {
     @Test
     public void writeJsonEmpty() {
         Request request = new Request(asLong(REQUEST_ID));
-        Snap rootSnap = new Snap(LogLineParser.NULL_SPAN);
-        request.addSnap(rootSnap);
+        Span rootSpan = new Span(LogLineParser.NULL_SPAN);
+        request.addSnap(rootSpan);
         ByteBuffer buffer = ByteBuffer.allocate(1000).order(ByteOrder.LITTLE_ENDIAN);
         assertEquals(0, request.writeAsJson(null, buffer, dictionary));
         assertEquals(0, buffer.position());
@@ -38,13 +38,13 @@ public class RequestTest {
     @Test
     public void writeJsonLevel1() {
         Request request = new Request(asLong(REQUEST_ID));
-        Snap rootSnap = new Snap(LogLineParser.NULL_SPAN);
-        Snap subSnap = new Snap(SNAP_A);
-        subSnap.setStarted(1);
-        subSnap.setEnded(3);
-        subSnap.setServiceId(SERVICE1_ID);
-        rootSnap.addChild(subSnap);
-        request.addSnap(rootSnap);
+        Span rootSpan = new Span(LogLineParser.NULL_SPAN);
+        Span subSpan = new Span(SNAP_A);
+        subSpan.setStarted(1);
+        subSpan.setEnded(3);
+        subSpan.setServiceId(SERVICE1_ID);
+        rootSpan.addChild(subSpan);
+        request.addSnap(rootSpan);
         ByteBuffer buffer = ByteBuffer.allocate(1000).order(ByteOrder.LITTLE_ENDIAN);
         assertEquals(1, request.writeAsJson(null, buffer, dictionary));
         buffer.flip();
@@ -57,18 +57,18 @@ public class RequestTest {
     @Test
     public void writeJsonLevel2() {
         Request request = new Request(asLong(REQUEST_ID));
-        Snap rootSnap = new Snap(LogLineParser.NULL_SPAN);
-        Snap subSnap = new Snap(SNAP_A);
-        subSnap.setStarted(1);
-        subSnap.setEnded(3);
-        Snap subSnap2 = new Snap(SNAP_B);
-        subSnap2.setStarted(4);
-        subSnap2.setEnded(5);
-        subSnap2.setServiceId(SERVICE2_ID);
-        subSnap.addChild(subSnap2);
-        subSnap.setServiceId(SERVICE1_ID);
-        rootSnap.addChild(subSnap);
-        request.addSnap(rootSnap);
+        Span rootSpan = new Span(LogLineParser.NULL_SPAN);
+        Span subSpan = new Span(SNAP_A);
+        subSpan.setStarted(1);
+        subSpan.setEnded(3);
+        Span subSpan2 = new Span(SNAP_B);
+        subSpan2.setStarted(4);
+        subSpan2.setEnded(5);
+        subSpan2.setServiceId(SERVICE2_ID);
+        subSpan.addChild(subSpan2);
+        subSpan.setServiceId(SERVICE1_ID);
+        rootSpan.addChild(subSpan);
+        request.addSnap(rootSpan);
         ByteBuffer buffer = ByteBuffer.allocate(1000).order(ByteOrder.LITTLE_ENDIAN);
         assertEquals(1, request.writeAsJson(null, buffer, dictionary));
         buffer.flip();
@@ -84,27 +84,27 @@ public class RequestTest {
     @Test
     public void writeJson2ChildrenSortByStart() {
         Request request = new Request(asLong(REQUEST_ID));
-        Snap rootSnap = new Snap(LogLineParser.NULL_SPAN);
-        Snap subSnap = new Snap(SNAP_A);
-        subSnap.setStarted(1);
-        subSnap.setEnded(3);
+        Span rootSpan = new Span(LogLineParser.NULL_SPAN);
+        Span subSpan = new Span(SNAP_A);
+        subSpan.setStarted(1);
+        subSpan.setEnded(3);
         {
-            Snap child2 = new Snap(SNAP_B);
+            Span child2 = new Span(SNAP_B);
             child2.setStarted(5);
             child2.setEnded(7);
             child2.setServiceId(SERVICE2_ID);
-            subSnap.addChild(child2);
+            subSpan.addChild(child2);
         }
         {
-            Snap child1 = new Snap(SNAP_B);
+            Span child1 = new Span(SNAP_B);
             child1.setStarted(4);
             child1.setEnded(5);
             child1.setServiceId(SERVICE2_ID);
-            subSnap.addChild(child1);
+            subSpan.addChild(child1);
         }
-        subSnap.setServiceId(SERVICE1_ID);
-        rootSnap.addChild(subSnap);
-        request.addSnap(rootSnap);
+        subSpan.setServiceId(SERVICE1_ID);
+        rootSpan.addChild(subSpan);
+        request.addSnap(rootSpan);
         ByteBuffer buffer = ByteBuffer.allocate(1000).order(ByteOrder.LITTLE_ENDIAN);
         assertEquals(1, request.writeAsJson(null, buffer, dictionary));
         buffer.flip();
