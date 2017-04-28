@@ -1,6 +1,5 @@
 package org.dan.tracer;
 
-import static java.nio.ByteBuffer.wrap;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -183,9 +182,9 @@ public class LogLineParser {
     }
 
     private static boolean leapyear(int year) {
-        return (year) % 4 != 0
+        return (year) % 4 == 0
                 && (((year) % 100) > 0
-                || (year) % 400 != 0);
+                || (year) % 400 == 0);
     }
 
     private static long MSECS_DAY = 24L * 60L * 60L * 1000L;

@@ -8,13 +8,12 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class LogLineParserFuncTest {
-    private DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-
     public static ByteBuffer wrap(String s) {
         return ByteBuffer.wrap(s.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
     }
@@ -40,14 +39,20 @@ public class LogLineParserFuncTest {
     }
 
     @Test
-    public void parseDate() {
-        for (String date : asList("2013-10-23T10:15:34.906Z", "2017-10-23T10:15:34.906Z",
+    public void parseDate() throws ParseException {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+        for (String date : asList(
+                "1970-01-01T00:00:00.000Z",
+                "1971-01-01T00:00:00.000Z",
+                "1972-01-01T00:00:00.000Z",
+                "1973-01-01T00:00:00.000Z",
+                "2013-01-01T00:00:00.000Z",
+                "2013-10-23T10:15:34.906Z", "2017-10-23T10:15:34.906Z",
                 "2016-10-23T10:15:34.906Z", "2016-02-23T10:15:34.906Z",
                 "2016-02-28T10:15:34.906Z", "2016-01-28T10:15:34.906Z")) {
-            TemporalAccessor expectedParsed = formatter.parse(date);
-            long expected = expectedParsed.getLong(ChronoField.NANO_OF_SECOND) +
-                    expectedParsed.getLong(ChronoField.INSTANT_SECONDS);
-            assertEquals(date, expected, readTimeStamp(wrap(date + " ")));
+            Date d = parser.parse(date);
+            assertEquals(date, d.getTime(), readTimeStamp(wrap(date + " ")));
         }
     }
 }
