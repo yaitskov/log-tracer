@@ -111,7 +111,7 @@ public class LogLineParserTest {
 
         assertEquals(1, callback[0]);
         assertEquals(3L, lastTs);
-        assertEquals("service8", dictionary.getById(1));
+        assertEquals("service8", new String(dictionary.getById(1).array()));
     }
 
     private ByteBuffer input(String text) {
@@ -143,7 +143,7 @@ public class LogLineParserTest {
                 "1970-01-01T00:00:00.000Z 1970-01-01T00:00:00.003Z 4twlb5e6 ser8 tmrya5qt->vmrya5qg\n"));
         assertEquals(3L, lastTs);
         assertEquals(1, callback[0]);
-        assertEquals("ser8", dictionary.getById(1));
+        assertEquals("ser8", new String(dictionary.getById(1).array()));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class LogLineParserTest {
         final long lastTs = logLineParser.parse(input);
         assertEquals(3L, lastTs);
         assertEquals(1, callback[0]);
-        assertEquals("ser8", dictionary.getById(1));
+        assertEquals("ser8", new String(dictionary.getById(1).array()));
     }
 
     @Test
