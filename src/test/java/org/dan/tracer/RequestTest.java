@@ -22,8 +22,8 @@ public class RequestTest {
     @Before
     public void setUp() {
         dictionary = Dictionary.create();
-        dictionary.add("service1");
-        dictionary.add("service2");
+        dictionary.add(ByteBuffer.wrap("service1".getBytes()));
+        dictionary.add(ByteBuffer.wrap("service2".getBytes()));
     }
 
     @Test

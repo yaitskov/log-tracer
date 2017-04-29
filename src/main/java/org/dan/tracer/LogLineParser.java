@@ -66,7 +66,7 @@ public class LogLineParser {
             searchNewLine = true;
             return 0;
         }
-        final String serviceName = readToken(in);
+        final ByteBuffer serviceName = readToken(in);
         if (serviceName == null) {
             return 0;
         }
@@ -97,7 +97,7 @@ public class LogLineParser {
         return result;
     }
 
-    private String readToken(ByteBuffer in) {
+    private ByteBuffer readToken(ByteBuffer in) {
         int start = in.position();
         while (true) {
             int b = in.get();
@@ -113,7 +113,7 @@ public class LogLineParser {
         in.position(start);
         in.get(token, 0, token.length);
         in.position(end); // space
-        return new String(token);
+        return ByteBuffer.wrap(token);
     }
 
     // 2013-10-23T10:13:04.945Z

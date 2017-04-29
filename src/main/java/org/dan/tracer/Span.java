@@ -77,7 +77,7 @@ public class Span implements Comparable<Span> {
         outputBuf.put(END_BYTES);
         writeDate(outputBuf, ended);
         outputBuf.put(SERVICE_BYTES);
-        outputBuf.put(serviceDictionary.getById(serviceId).getBytes());
+        outputBuf.put(serviceDictionary.getById(serviceId).array());
         if (children.isEmpty()) {
             outputBuf.put((byte) '"');
         } else {
