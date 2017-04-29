@@ -84,7 +84,7 @@ public class LogLineParserTest {
 
     private String format(long ts) {
         ByteBuffer b = ByteBuffer.allocate(40).order(LITTLE_ENDIAN);
-        LogLineParser.writeDate(b, ts);
+        LogLineParser.writeDateTime(b, ts);
         b.flip();
         return new String(b.array(), 0, b.limit());
     }

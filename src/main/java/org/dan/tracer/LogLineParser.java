@@ -230,49 +230,52 @@ public class LogLineParser {
     }
 
     // 2013-10-23 10:13:04.945
-    public static void writeDate(ByteBuffer outputBuf, long time) {
-        final int dayno = (int) (time / MSECS_DAY);
-        final int basedDayNo = dayno;
-        if (basedDayNo < 0 || basedDayNo >= DAY_TO_YEAR_MONTH.length) {
+    public static void writeDateTime(ByteBuffer outputBuf, long time) {
+        final int dayNo = (int) (time / MSECS_DAY);
+        if (dayNo < 0 || dayNo >= DAY_TO_YEAR_MONTH.length) {
             logger.error("Timestamp {} is out of range", time);
             outputBuf.put(ZERO_TIME_BYTES);
         } else {
-            {
-                final int yearDayMonth = DAY_TO_YEAR_MONTH[basedDayNo];
-                final int year = yearDayMonth >>> 9;
-                writeIntAsStr(outputBuf, year, 4);
-                outputBuf.put((byte) '-');
-
-                final int month = yearDayMonth & 0xf;
-                writeIntAsStr(outputBuf, month, 2);
-                outputBuf.put((byte) '-');
-
-                final int day = (yearDayMonth >>> 4) & 0x1f;
-                writeIntAsStr(outputBuf, day, 2);
-                outputBuf.put((byte) ' ');
-            }
-            {
-                int dayClock = (int) (time % MSECS_DAY);
-                final int ms = dayClock % 1000;
-                dayClock /= 1000L;
-                {
-                    final int hour = dayClock / 3600;
-                    writeIntAsStr(outputBuf, hour, 2);
-                    outputBuf.put((byte) ':');
-                }
-                {
-                    final int min = (dayClock % 3600) / 60;
-                    writeIntAsStr(outputBuf, min, 2);
-                    outputBuf.put((byte) ':');
-                }
-                {
-                    final int sec = dayClock % 60;
-                    writeIntAsStr(outputBuf, sec, 2);
-                }
-                outputBuf.put((byte) '.');
-                writeIntAsStr(outputBuf, ms, 3);
-            }
+            writeDatePart(outputBuf, DAY_TO_YEAR_MONTH[dayNo]);
+            writeTimePart(outputBuf, time);
         }
+    }
+
+    private static void writeTimePart(ByteBuffer outputBuf, long time) {
+        int dayClock = (int) (time % MSECS_DAY);
+        final int ms = dayClock % 1000;
+        dayClock /= 1000L;
+        {
+            final int hour = dayClock / 3600;
+            writeIntAsStr(outputBuf, hour, 2);
+            outputBuf.put((byte) ':');
+        }
+        {
+            final int min = (dayClock % 3600) / 60;
+            writeIntAsStr(outputBuf, min, 2);
+            outputBuf.put((byte) ':');
+        }
+        {
+            final int sec = dayClock % 60;
+            writeIntAsStr(outputBuf, sec, 2);
+        }
+        outputBuf.put((byte) '.');
+        writeIntAsStr(outputBuf, ms, 3);
+    }
+
+    private static void writeDatePart(ByteBuffer outputBuf, int i) {
+        final int yearDayMonth = i;
+        final int year = yearDayMonth >>> 9;
+        writeIntAsStr(outputBuf, year, 4);
+        outputBuf.put((byte) '-');
+
+        final int month = yearDayMonth & 0xf;
+        writeIntAsStr(outputBuf, month, 2);
+        outputBuf.put((byte) '-');
+
+        final int day = (yearDayMonth >>> 4) & 0x1f;
+        writeIntAsStr(outputBuf, day, 2);
+        outputBuf.put((byte) ' ');
     }
 
     private static void writeIntAsStr(ByteBuffer outputBuf, int n, int width) {
@@ -289,7 +292,7 @@ public class LogLineParser {
 
     public static String timeToString(long time) {
         ByteBuffer b = ByteBuffer.allocate(ZERO_TIME_BYTES.length);
-        writeDate(b, time);
+        writeDateTime(b, time);
         return new String(b.array());
     }
 }

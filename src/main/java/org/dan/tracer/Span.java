@@ -1,6 +1,6 @@
 package org.dan.tracer;
 
-import static org.dan.tracer.LogLineParser.writeDate;
+import static org.dan.tracer.LogLineParser.writeDateTime;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -73,9 +73,9 @@ public class Span implements Comparable<Span> {
                             Dictionary serviceDictionary) {
         ensureSpace(100, outputCh, outputBuf);
         outputBuf.put(START_BYTES);
-        writeDate(outputBuf, started);
+        writeDateTime(outputBuf, started);
         outputBuf.put(END_BYTES);
-        writeDate(outputBuf, ended);
+        writeDateTime(outputBuf, ended);
         outputBuf.put(SERVICE_BYTES);
         outputBuf.put(serviceDictionary.getById(serviceId).array());
         if (children.isEmpty()) {
