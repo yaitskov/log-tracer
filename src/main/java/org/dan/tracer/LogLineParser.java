@@ -210,6 +210,7 @@ public class LogLineParser {
     private static final long[] YEAR_TO_MS;
 
     static  {
+        long started = System.currentTimeMillis();
         final int stopYear = now.getYear() + 2;
         DAY_TO_YEAR_MONTH = new int[(stopYear - BASE_YEAR) * 366];
         YEAR_TO_MS = new long[stopYear - BASE_YEAR];
@@ -227,6 +228,8 @@ public class LogLineParser {
             }
             yearMs += (leapShift / 12L + 365L) * MSECS_DAY;
         }
+        long ended = System.currentTimeMillis();
+        logger.info("Date table init took {} ms", ended - started);
     }
 
     // 2013-10-23 10:13:04.945
@@ -263,8 +266,8 @@ public class LogLineParser {
         writeIntAsStr(outputBuf, ms, 3);
     }
 
-    private static void writeDatePart(ByteBuffer outputBuf, int i) {
-        final int yearDayMonth = i;
+    private static void writeDatePart(final ByteBuffer outputBuf,
+            final int yearDayMonth) {
         final int year = yearDayMonth >>> 9;
         writeIntAsStr(outputBuf, year, 4);
         outputBuf.put((byte) '-');
