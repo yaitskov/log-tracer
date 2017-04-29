@@ -1,21 +1,26 @@
 package org.dan.tracer;
 
+import com.koloboke.collect.map.hash.HashIntObjMap;
+import com.koloboke.collect.map.hash.HashIntObjMaps;
+import com.koloboke.collect.map.hash.HashObjIntMap;
+import com.koloboke.collect.map.hash.HashObjIntMaps;
+
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Dictionary {
-    private final Map<ByteBuffer, Integer> byName;
-    private final Map<Integer, ByteBuffer> byId;
+    private final HashObjIntMap<ByteBuffer> byName;
+    private final HashIntObjMap<ByteBuffer> byId;
 
-    private Dictionary(Map<ByteBuffer, Integer> byName,
-            Map<Integer, ByteBuffer> byId) {
+    private Dictionary(HashObjIntMap<ByteBuffer> byName,
+            HashIntObjMap<ByteBuffer> byId) {
         this.byId = byId;
         this.byName = byName;
     }
 
     public static Dictionary create() {
-        return new Dictionary(new HashMap<>(), new HashMap<>());
+        return new Dictionary(
+                HashObjIntMaps.newMutableMap(),
+                HashIntObjMaps.newMutableMap());
     }
 
     public int add(ByteBuffer word) {
