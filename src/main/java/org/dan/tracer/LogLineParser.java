@@ -90,9 +90,20 @@ public class LogLineParser {
     }
 
     private static long strToLong(String s) {
+        return strToLong(s, s.length());
+    }
+
+    private static long strToLong(String s, int width) {
+        if (width < s.length()) {
+            throw new IllegalArgumentException("width is too small");
+        }
         long result = 0;
         for (int i = s.length() - 1; i >= 0 ; --i) {
             result = (result << 8) + s.charAt(i);
+        }
+        width -= s.length();
+        for (int i = 0; i < width; ++i) {
+            result = (result << 8) | '0';
         }
         return result;
     }
@@ -208,6 +219,8 @@ public class LogLineParser {
     private static final int BASE_YEAR = 1970;
     private static final int[] DAY_TO_YEAR_MONTH;
     private static final long[] YEAR_TO_MS;
+    private static final int[] FOUR_DIGIT = new int[now.getYear() + 2];
+    private static final short[] TWO_DIGIT = new short[100];
 
     static  {
         long started = System.currentTimeMillis();
@@ -230,6 +243,13 @@ public class LogLineParser {
         }
         long ended = System.currentTimeMillis();
         logger.info("Date table init took {} ms", ended - started);
+
+        for (int i = 0; i < TWO_DIGIT.length; ++i) {
+            TWO_DIGIT[i] = (short) strToLong(String.valueOf(i), 2);
+        }
+        for (int i = 0; i < FOUR_DIGIT.length; ++i) {
+            FOUR_DIGIT[i] = (int) strToLong(String.valueOf(i), 4);
+        }
     }
 
     // 2013-10-23 10:13:04.945
@@ -281,21 +301,27 @@ public class LogLineParser {
         outputBuf.put((byte) ' ');
     }
 
-    private static void writeIntAsStr(ByteBuffer outputBuf, int n, int width) {
-        int pos = outputBuf.position() + width;
-        outputBuf.position(pos);
-        while (true) {
-            outputBuf.put(--pos, (byte) ('0' + (n % 10)));
-            n /= 10;
-            if (--width <= 0) {
+    static void writeIntAsStr(ByteBuffer outputBuf, int n, int width) {
+        switch (width) {
+            case 2:
+                outputBuf.putShort(TWO_DIGIT[n]);
                 break;
-            }
+            case 3:
+                outputBuf.putInt(FOUR_DIGIT[n] >>> 8)
+                        .position(outputBuf.position() - 1);
+                break;
+            case 4:
+                outputBuf.putInt(FOUR_DIGIT[n]);
+                break;
+            default:
+                throw new IllegalArgumentException("Width "
+                        + width + " is not supported");
         }
     }
 
     public static String timeToString(long time) {
-        ByteBuffer b = ByteBuffer.allocate(ZERO_TIME_BYTES.length);
+        ByteBuffer b = ByteBuffer.allocate(ZERO_TIME_BYTES.length + 1);
         writeDateTime(b, time);
-        return new String(b.array());
+        return new String(b.array(), 0, ZERO_TIME_BYTES.length);
     }
 }

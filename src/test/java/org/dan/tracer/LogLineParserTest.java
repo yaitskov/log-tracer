@@ -3,6 +3,7 @@ package org.dan.tracer;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.asList;
 import static org.dan.tracer.LogLineParser.readTimeStamp;
+import static org.dan.tracer.LogLineParser.writeIntAsStr;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -190,5 +191,25 @@ public class LogLineParserTest {
         assertEquals(0, logLineParser.parse(input));
         assertEquals(0, callback[0]);
         assertTrue(logLineParser.isSearchNewLine());
+    }
+
+    @Test
+    public void write2DigitIntAsStr() {
+        assertEquals("00", writeIntAsStr(0, 2));
+        assertEquals("01", writeIntAsStr(1, 2));
+        assertEquals("09", writeIntAsStr(9, 2));
+        assertEquals("10", writeIntAsStr(10, 2));
+        assertEquals("99", writeIntAsStr(99, 2));
+        assertEquals("000", writeIntAsStr(0, 3));
+        assertEquals("001", writeIntAsStr(1, 3));
+        assertEquals("999", writeIntAsStr(999, 3));
+        assertEquals("1999", writeIntAsStr(1999, 4));
+        assertEquals("2017", writeIntAsStr(2017, 4));
+    }
+
+    private String writeIntAsStr(int n, int width) {
+        ByteBuffer buf = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
+        LogLineParser.writeIntAsStr(buf, n, width);
+        return new String(buf.array(), 0, width);
     }
 }
