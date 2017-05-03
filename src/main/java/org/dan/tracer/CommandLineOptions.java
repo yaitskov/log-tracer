@@ -19,12 +19,11 @@ public class CommandLineOptions {
     private int readBufferBytes = 1024 * 1024;
     private int writeBufferBytes = 1024 * 1024;
     private int maxLineLength = 120;
-    private int flushLineCheck = 10000;
     private ReadableByteChannel inputCh = Channels.newChannel(System.in);
     private WritableByteChannel outputCh = Channels.newChannel(System.out);
 
-    public int getFlushLineCheck() {
-        return flushLineCheck;
+    void setExpireRequestAfterMs(long expireRequestAfterMs) {
+        this.expireRequestAfterMs = expireRequestAfterMs;
     }
 
     public int getMaxLineLength() {
@@ -62,9 +61,6 @@ public class CommandLineOptions {
                     break;
                 case "-help":
                     printHelp();
-                    break;
-                case "-flush-check":
-                    flushLineCheck = optionIntArg(args, ++i);
                     break;
                 case "-rbuf":
                     readBufferBytes = optionIntArg(args, ++i);
@@ -136,12 +132,15 @@ public class CommandLineOptions {
                 + "    -out            - path to output trace file instead of stdout\n"
                 + "    -rbuf           - size of read buffer in bytes\n"
                 + "    -wbuf           - size of write buffer in bytes\n"
-                + "    -flush-check    - check expired requests after N log lines are consumed\n"
                 + "    -max-line       - max expected length of a log line\n"
                 + "    -expire-minute  - max difference for request between \n"
                 + "                      the newest line and newer request line\n"
                 + "                      logging is configured via \n"
                 + "                      -DLOG_LEVEL=INFO for jvm\n");
         System.exit(1);
+    }
+
+    public int getLogStatsAfterBlocks() {
+        return 1;
     }
 }

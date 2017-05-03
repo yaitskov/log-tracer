@@ -1,35 +1,48 @@
 package org.dan.tracer;
 
+import static com.koloboke.collect.map.hash.HashIntObjMaps.newMutableMap;
+
 import com.koloboke.collect.map.hash.HashIntObjMap;
-import com.koloboke.collect.map.hash.HashIntObjMaps;
-import com.koloboke.collect.map.hash.HashObjIntMap;
-import com.koloboke.collect.map.hash.HashObjIntMaps;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Dictionary {
-    private final HashObjIntMap<ByteBuffer> byName;
+    private final AtomicInteger idAllocator;
+    private final ConcurrentMap<ByteBuffer, Integer> byName;
     private final HashIntObjMap<ByteBuffer> byId;
 
-    private Dictionary(HashObjIntMap<ByteBuffer> byName,
+    private Dictionary(AtomicInteger idAllocator,
+            ConcurrentMap<ByteBuffer, Integer> byName,
             HashIntObjMap<ByteBuffer> byId) {
+        this.idAllocator = idAllocator;
         this.byId = byId;
         this.byName = byName;
     }
 
     public static Dictionary create() {
         return new Dictionary(
-                HashObjIntMaps.newMutableMap(),
-                HashIntObjMaps.newMutableMap());
+                new AtomicInteger(),
+                new ConcurrentHashMap<>(),
+                newMutableMap());
+    }
+
+    public Dictionary fork() {
+        return new Dictionary(idAllocator, byName, newMutableMap());
     }
 
     public int add(ByteBuffer word) {
-         int id = byName.getOrDefault(word, 0);
-         if (id == 0) {
-             byId.put(id = byId.size() + 1, word);
-             byName.put(word, id);
-         }
-         return id;
+        final int id = idAllocator.incrementAndGet();
+        final Integer wasId = byName.putIfAbsent(word, id);
+        if (wasId == null) {
+            byId.put(id, word);
+            return id;
+        } else {
+            byId.put((int) wasId, word);
+            return wasId;
+        }
     }
 
     public ByteBuffer getById(int serviceId) {

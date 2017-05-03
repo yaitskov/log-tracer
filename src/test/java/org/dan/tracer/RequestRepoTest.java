@@ -1,15 +1,16 @@
 package org.dan.tracer;
 
+import static com.koloboke.collect.map.hash.HashLongObjMaps.newMutableMap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.dan.tracer.Converter.FIRST_BLOCK_NO;
 import static org.dan.tracer.LogLineParser.NULL_SPAN;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import com.koloboke.collect.map.hash.HashLongObjMap;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
 
 public class RequestRepoTest {
     public static final int SERVICE_ID = 1;
@@ -18,38 +19,51 @@ public class RequestRepoTest {
     public static final int ENDED = 13;
     public static final int SNAP_A = 5;
     public static final int SNAP_B = 6;
+    public static final long EXPIRE_WINDOW = 100L;
+    public static final long BLOCK_TIME_SPAN = 10L * EXPIRE_WINDOW;
 
     private RequestRepo requestRepo;
+    private CommandLineOptions options;
+    private Bus bus;
 
     @Before
     public void setUp() {
-        requestRepo = new RequestRepo(null, null, null);
+        options = new CommandLineOptions();
+        options.setExpireRequestAfterMs(EXPIRE_WINDOW);
+        bus = new Bus();
+        requestRepo = new RequestRepo(null, null, null, options, bus);
     }
 
     @Test
-    public void autoEndSkip() {
+    public void writeRequestsJsonForwardNoTransitRequests()
+            throws InterruptedException {
         Request request = new Request(1);
-        request.updateLastTimeStamp(100L);
+        request.updateLastTimeStamp(BLOCK_TIME_SPAN - EXPIRE_WINDOW / 2);
         requestRepo.getRequests().put(1L, request);
-        requestRepo.autoEnd(101L, 5);
-        assertEquals(1, requestRepo.getRequests().size());
+        final HashLongObjMap<Request> transitRequests = newMutableMap();
+        requestRepo.writeRequestsJson(FIRST_BLOCK_NO, transitRequests,
+                0L, BLOCK_TIME_SPAN);
+        assertTrue(requestRepo.getRequests().isEmpty());
+        assertEquals(transitRequests, bus.peekTransitRequests(FIRST_BLOCK_NO));
+        assertTrue(transitRequests.isEmpty());
     }
 
     @Test
-    public void autoEndCollects() {
-        int[] serialized = new int[1];
-        Request request = new Request(1) {
-            @Override
-            public int writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf, Dictionary dictionary) {
-                ++serialized[0];
-                return 1;
-            }
-        };
-        request.updateLastTimeStamp(100L);
-        requestRepo.getRequests().put(1L, request);
-        requestRepo.autoEnd(106L, 5);
-        assertEquals(0, requestRepo.getRequests().size());
-        assertEquals(1, serialized[0]);
+    public void writeRequestsJsonForwardTransitRequests() throws InterruptedException {
+        final HashLongObjMap<Request> transitRequests = newMutableMap();
+        final Request tRequest = new Request(1);
+        transitRequests.put(tRequest.getRequestId(), tRequest);
+        tRequest.updateLastTimeStamp(BLOCK_TIME_SPAN - EXPIRE_WINDOW / 2L);
+
+        final Request request = new Request(tRequest.getRequestId());
+        request.updateLastTimeStamp(2L * BLOCK_TIME_SPAN - EXPIRE_WINDOW / 2L);
+        requestRepo.getRequests().put(request.getRequestId(), request);
+        requestRepo.writeRequestsJson(FIRST_BLOCK_NO + 1, transitRequests,
+                BLOCK_TIME_SPAN, 2L * BLOCK_TIME_SPAN);
+        assertTrue(requestRepo.getRequests().isEmpty());
+        assertTrue(bus.peekTransitRequests(FIRST_BLOCK_NO)
+                .containsKey(tRequest.getRequestId()));
+        assertTrue(transitRequests.isEmpty());
     }
 
     @Test
@@ -61,10 +75,10 @@ public class RequestRepoTest {
 
     private void checkSnapsAB() {
         Request req = requestRepo.getRequests().get(REQUEST_ID);
-        assertEquals(ENDED, req.getOldestLine());
+        assertEquals(ENDED, req.getNewestLine());
 
-        Span spanA = req.getSnap(SNAP_A);
-        Span spanB = req.getSnap(SNAP_B);
+        Span spanA = req.getSpan(SNAP_A);
+        Span spanB = req.getSpan(SNAP_B);
 
         assertEquals(spanB.getChildren(), emptyList());
         assertEquals(spanA.getChildren(), singletonList(spanB));

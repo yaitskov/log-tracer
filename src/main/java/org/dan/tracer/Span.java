@@ -1,10 +1,16 @@
 package org.dan.tracer;
 
+import static com.google.common.collect.Iterables.mergeSorted;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.dan.tracer.LogLineParser.writeDateTime;
+import static org.dan.tracer.Request.MIN_FREE_SPACE_BYTES;
+import static org.dan.tracer.Request.Status.MORE_SPACE;
+import static org.dan.tracer.Request.Status.OK;
 
-import java.io.IOException;
+import org.dan.tracer.Request.Status;
+
 import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +20,7 @@ public class Span implements Comparable<Span> {
     private static final byte[] SERVICE_BYTES = "\",\"service\":\"".getBytes();
     private static final byte[] CALLS_BYTES = "\",\"calls\":[".getBytes();
 
-    private final List<Span> children = new ArrayList<>();
+    private List<Span> children = new ArrayList<>();
     private final long id;
     private int serviceId;
     private long started;
@@ -55,23 +61,11 @@ public class Span implements Comparable<Span> {
         return size + 1;
     }
 
-    public static void ensureSpace(final int minFreeSpace,
-            final WritableByteChannel outputCh,
-            final ByteBuffer outputBuf) {
-        if (outputBuf.remaining() < minFreeSpace) {
-            outputBuf.flip();
-            try {
-                outputCh.write(outputBuf);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            outputBuf.compact();
+    public Status writeAsJson(ByteBuffer outputBuf,
+            Dictionary serviceDictionary) {
+        if (outputBuf.remaining() < MIN_FREE_SPACE_BYTES) {
+            return MORE_SPACE;
         }
-    }
-
-    public void writeAsJson(WritableByteChannel outputCh, ByteBuffer outputBuf,
-                            Dictionary serviceDictionary) {
-        ensureSpace(100, outputCh, outputBuf);
         outputBuf.put(START_BYTES);
         writeDateTime(outputBuf, started);
         outputBuf.put(END_BYTES);
@@ -82,14 +76,19 @@ public class Span implements Comparable<Span> {
             outputBuf.put((byte) '"');
         } else {
             outputBuf.put(CALLS_BYTES);
-            children.get(0).writeAsJson(outputCh, outputBuf, serviceDictionary);
+            if (children.get(0).writeAsJson(outputBuf, serviceDictionary) == MORE_SPACE) {
+                return MORE_SPACE;
+            }
             for (int i = 1; i < children.size(); ++i) {
                 outputBuf.put((byte) ',');
-                children.get(i).writeAsJson(outputCh, outputBuf, serviceDictionary);
+                if (children.get(i).writeAsJson(outputBuf, serviceDictionary) == MORE_SPACE) {
+                    return MORE_SPACE;
+                }
             }
             outputBuf.put((byte) ']');
         }
         outputBuf.put((byte) '}');
+        return OK;
     }
 
     public int getServiceId() {
@@ -118,5 +117,10 @@ public class Span implements Comparable<Span> {
 
     public List<Span> getChildren() {
         return children;
+    }
+
+    public void mergeChildrenOf(Span span) {
+        children = newArrayList(mergeSorted(asList(children, span.children),
+                Span::compareTo));
     }
 }

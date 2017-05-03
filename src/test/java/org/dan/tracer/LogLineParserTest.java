@@ -3,7 +3,6 @@ package org.dan.tracer;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.asList;
 import static org.dan.tracer.LogLineParser.readTimeStamp;
-import static org.dan.tracer.LogLineParser.writeIntAsStr;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -18,6 +17,12 @@ import java.util.TimeZone;
 public class LogLineParserTest {
     public static ByteBuffer wrap(String s) {
         return ByteBuffer.wrap(s.getBytes()).order(LITTLE_ENDIAN);
+    }
+
+    private static class RequestRepoMock extends RequestRepo {
+        public RequestRepoMock() {
+            super(null, null, null, null, null);
+        }
     }
 
     @Test
@@ -94,7 +99,7 @@ public class LogLineParserTest {
     public void parseFirstTraceLine() {
         Dictionary dictionary = Dictionary.create();
         int[] callback = new int[1];
-        RequestRepo repo = new RequestRepo(null, null, null) {
+        RequestRepo repo = new RequestRepoMock() {
             @Override
             public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
                 ++callback[0];
@@ -127,7 +132,7 @@ public class LogLineParserTest {
     public void parseNextTraceLine() {
         Dictionary dictionary = Dictionary.create();
         int[] callback = new int[1];
-        RequestRepo repo = new RequestRepo(null, null, null) {
+        RequestRepo repo = new RequestRepoMock() {
             @Override
             public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
                 ++callback[0];
@@ -151,7 +156,7 @@ public class LogLineParserTest {
     public void parseSearchNewLineNextTraceLine() {
         Dictionary dictionary = Dictionary.create();
         int[] callback = new int[1];
-        RequestRepo repo = new RequestRepo(null, null, null) {
+        RequestRepo repo = new RequestRepoMock() {
             @Override
             public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
                 ++callback[0];
@@ -179,7 +184,7 @@ public class LogLineParserTest {
     public void turnOnSearchNewLine() {
         Dictionary dictionary = Dictionary.create();
         int[] callback = new int[1];
-        RequestRepo repo = new RequestRepo(null, null, null) {
+        RequestRepo repo = new RequestRepoMock() {
             @Override
             public void line(int serviceId, long requestId, long started, long ended, long callerSnapId, long snapId) {
                 ++callback[0];

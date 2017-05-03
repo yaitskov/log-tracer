@@ -85,6 +85,8 @@ public class LogLineParser {
         if (LINE_END == in.get()) {
             requestRepo.line(serviceDictionary.add(serviceName),
                     requestId, started, ended, callerSpan, span);
+        } else {
+            requestRepo.dropLine();
         }
         return ended;
     }
