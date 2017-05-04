@@ -7,6 +7,7 @@ import static org.dan.tracer.LogLineParser.writeDateTime;
 import static org.dan.tracer.Request.MIN_FREE_SPACE_BYTES;
 import static org.dan.tracer.Request.Status.MORE_SPACE;
 import static org.dan.tracer.Request.Status.OK;
+import static org.dan.tracer.Request.longToStr;
 
 import org.dan.tracer.Request.Status;
 
@@ -122,5 +123,10 @@ public class Span implements Comparable<Span> {
     public void mergeChildrenOf(Span span) {
         children = newArrayList(mergeSorted(asList(children, span.children),
                 Span::compareTo));
+    }
+
+    @Override
+    public String toString() {
+        return longToStr(id);
     }
 }

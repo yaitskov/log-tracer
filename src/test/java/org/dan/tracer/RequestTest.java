@@ -5,6 +5,7 @@ import static com.google.common.primitives.Longs.asList;
 import static com.koloboke.collect.set.hash.HashLongSets.newImmutableSet;
 import static java.util.stream.Collectors.toList;
 import static org.dan.tracer.LogLineParser.NULL_SPAN;
+import static org.dan.tracer.LogLineParser.strToLong;
 import static org.dan.tracer.LogLineParserTest.asLong;
 import static org.dan.tracer.Request.Status.OK;
 import static org.dan.tracer.Request.Status.SKIP;
@@ -151,17 +152,17 @@ public class RequestTest {
 
     @Test
     public void mergeChildTransitAndRoot() {
-        final Request transit = new Request(1);
+        final Request transit = new Request(strToLong("req1"));
         transit.updateLastTimeStamp(17);
-        final Span transitSpanA = new Span(1);
+        final Span transitSpanA = new Span(strToLong("spanA"));
         transit.addSourceSpan(transitSpanA);
-        final Span spanB = new Span(2);
+        final Span spanB = new Span(strToLong("spanB"));
         spanB.setStarted(SPAN_B_STARTED);
         spanB.setServiceId(SPAN_B_SERVICE);
         spanB.setEnded(SPAN_B_ENDED);
         transitSpanA.addChild(spanB);
         transit.addSpan(spanB);
-        final Request request = new Request(1);
+        final Request request = new Request(transit.getRequestId());
         final Span rootSpan = new Span(NULL_SPAN);
         request.addSourceSpan(rootSpan);
         final Span spanA = new Span(transitSpanA.getId());

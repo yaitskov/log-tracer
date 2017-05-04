@@ -91,7 +91,7 @@ public class LogLineParser {
         return ended;
     }
 
-    private static long strToLong(String s) {
+    public static long strToLong(String s) {
         return strToLong(s, s.length());
     }
 

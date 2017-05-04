@@ -91,7 +91,11 @@ public class Request {
     public void updateLastTimeStamp(long last) {
         newestLine = Math.max(last, newestLine);
         if (last > 0) {
-            oldestLine = Math.min(last, oldestLine);
+            if (oldestLine == 0) {
+                oldestLine = last;
+            } else {
+                oldestLine = Math.min(last, oldestLine);
+            }
         }
     }
 
@@ -99,13 +103,18 @@ public class Request {
         return newestLine;
     }
 
-    public String toString() {
+    public static String longToStr(long l){
         ByteBuffer b = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
-        b.putLong(requestId);
+        b.putLong(l);
         return new String(b.array());
     }
 
+    public String toString() {
+        return longToStr(requestId);
+    }
+
     public void merge(Request forwarded) {
+        updateLastTimeStamp(forwarded.oldestLine);
         updateLastTimeStamp(forwarded.newestLine);
         final LongCursor sourceSpanCursor = sourceSpans.cursor();
         final LongObjMap<Span> forwardedMap = forwarded.spanMap;
@@ -155,6 +164,7 @@ public class Request {
                 Span b = spanMap.get(childB.getId());
                 if (b == null) {
                     spanMap.put(childB.getId(), childB);
+                    childA.mergeChildrenOf(forwardedChildA);
                 } else {
                     childB.mergeChildrenOf(b);
                     spanMap.put(childB.getId(), childB);
